@@ -1,5 +1,27 @@
 #!/usr/bin/env python3
 
+'''
+usage: update-certs.py [-h] --key KEY --cert CERT [--chain CHAIN] [--ca CA] [--candid] [--rbac] [--maas] [--maas-port MAAS_PORT] [--all] [--force] [--backup | --no-backup]
+
+Update MAAS related certificates
+
+options:
+  -h, --help            show this help message and exit
+  --key KEY             Certificate key file
+  --cert CERT           Certificate file
+  --chain CHAIN         Certificate Chain file
+  --ca CA               Certificate Authority file
+  --candid              Update Candid Cert (if needed)
+  --rbac                Update RBAC Cert (if needed)
+  --maas                Update MAAS Cert (if needed)
+  --maas-port MAAS_PORT
+                        MAAS SSL Port (Default is 443)
+  --all                 Update all certs (same as --maas --rbac --candid)
+  --force               Update even if the cert is the same
+  --backup, --no-backup
+                        Perform a backup of the changed items (default: True)
+'''
+
 import argparse
 import logging
 import os
