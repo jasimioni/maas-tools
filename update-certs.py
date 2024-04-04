@@ -288,13 +288,14 @@ if __name__ == '__main__':
         action='store_true'
     )
     parser.add_argument(
-        "--backup",
-        help='Perform a backup of the changed items',
-        action=argparse.BooleanOptionalAction,
-        default=True
+        "--no-backup",
+        help='Does not perform a backup of the changed items',
+        action='store_true'
     )
 
     args = parser.parse_args()
+
+    backup = not args.no_backup
 
     assert os.path.isfile(args.cert), f"Could not open {args.cert}"
     assert os.path.isfile(args.key), f"Could not open {args.key}"
@@ -304,10 +305,10 @@ if __name__ == '__main__':
         assert os.path.isfile(args.ca), f"Could not open {args.ca}"
 
     if args.all or args.candid:
-        update_candid(cert_file=args.cert, key_file=args.key, chain_file=args.chain, ca_file=args.ca, force=args.force, backup=args.backup)
+        update_candid(cert_file=args.cert, key_file=args.key, chain_file=args.chain, ca_file=args.ca, force=args.force, backup=backup)
 
     if args.all or args.rbac:
-        update_rbac(cert_file=args.cert, key_file=args.key, chain_file=args.chain, ca_file=args.ca, force=args.force, backup=args.backup)
+        update_rbac(cert_file=args.cert, key_file=args.key, chain_file=args.chain, ca_file=args.ca, force=args.force, backup=backup)
 
     if args.all or args.maas:
-        update_maas(cert_file=args.cert, key_file=args.key, chain_file=args.chain, ca_file=args.ca, force=args.force, port=args.maas_port, backup=args.backup)
+        update_maas(cert_file=args.cert, key_file=args.key, chain_file=args.chain, ca_file=args.ca, force=args.force, port=args.maas_port, backup=backup)
