@@ -1,0 +1,10 @@
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+subjectAltName = @alt_names
+[alt_names]
+DNS.1 = maas-srv01
+DNS.2 = maas-srv02
+DNS.3 = rbac
+DNS.4 = candid
+DNS.5 = maas
