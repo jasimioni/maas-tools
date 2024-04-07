@@ -30,6 +30,8 @@ import subprocess
 import yaml
 from datetime import datetime
 from cryptography import x509
+from importlib.metadata import version
+from cryptography.hazmat.backends import default_backend
 
 def str_presenter(dumper, data):
     """configures yaml for dumping multiline strings
@@ -52,7 +54,10 @@ def detect_maas_installation():
 
 def get_cert_data(cert):
     try:
-        cert_data = x509.load_pem_x509_certificate(cert)
+        if version('cryptography')[0:2] == '2.':
+            cert_data = x509.load_pem_x509_certificate(cert, default_backend())
+        else:
+            cert_data = x509.load_pem_x509_certificate(cert)
         return cert_data.serial_number, cert_data.subject.rfc4514_string(), cert_data.not_valid_after
     except:
         return None, None, None
@@ -203,8 +208,12 @@ def update_rbac(cert_file, key_file, chain_file=None, ca_file=None, force=False,
         crbs_py_file = os.path.join(rbac_config_folder, 'crbs.py')
         uwsgi_ini_file = os.path.join(rbac_config_folder, 'uwsgi.ini')
 
-        shutil.copy2(crbs_py_file, crbs_py_file + backup_suffix)
-        shutil.copy2(uwsgi_ini_file, uwsgi_ini_file + backup_suffix)
+        try:
+            shutil.copy2(crbs_py_file, crbs_py_file + backup_suffix)
+            shutil.copy2(uwsgi_ini_file, uwsgi_ini_file + backup_suffix)
+        except Exception as e:
+            logging.warn(f"Could not backup crbs and uswgi files: {e}")
+
 
         with open(key_file) as f:
             key = f.read()
@@ -224,8 +233,11 @@ def update_rbac(cert_file, key_file, chain_file=None, ca_file=None, force=False,
 
         subprocess.run(cmd)
 
-        shutil.move(crbs_py_file + backup_suffix, crbs_py_file)
-        shutil.move(uwsgi_ini_file + backup_suffix, uwsgi_ini_file)
+        try:
+            shutil.move(crbs_py_file + backup_suffix, crbs_py_file)
+            shutil.move(uwsgi_ini_file + backup_suffix, uwsgi_ini_file)
+        except Exception as e:
+            logging.warn(f"Could not restore crbs and uswgi files: {e}")
 
         subprocess.run([ 'snap', 'stop', 'canonical-rbac' ])
         subprocess.run([ 'snap', 'start', 'canonical-rbac' ])

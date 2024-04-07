@@ -204,16 +204,16 @@ def check_rbac():
 
             print(f"\t{'Snap ' + name + ':':14s} {status}")
 
-    output = subprocess.run(['curl', '-k', RBACURL + '/r/'], capture_output=True)
+    output = subprocess.run(['curl', '-k', RBACURL + '/status'], capture_output=True)
     if output.returncode:
         status = red('unavailable')
     else:
-        match = re.search('RBAC', output.stdout.decode())
-        if match:
-            status = green('right output')
-        else:
+        try:
+            status_json = json.loads(output.stdout)
+            assert status_json["config"]["auth"] == "ok" and status_json["config"]["db"] == "ok"
+        except Exception as e:
             status = red('wrong output') + ' [' + output.stdout.decode().rstrip() + ']'
-
+            
     print(f"\t{'RBAC URL:':14s} {status}")
     check_certificate(RBACURL)
 
