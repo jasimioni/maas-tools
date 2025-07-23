@@ -24,6 +24,11 @@ class MAASClient:
 
         if method == 'POST':
             resp = self.session.request(method, url, data=params, verify=False)
+        elif method == 'PUT':
+            files_payload = {}
+            for param in params.keys():
+                files_payload[param] = (None, params[param], 'text/plain; charset="utf-8"')
+            resp = self.session.request(method, url, files=files_payload, verify=False)
         elif method == 'GET':
             resp = self.session.request(method, url, params=params, verify=False)
         else:
@@ -37,6 +42,9 @@ class MAASClient:
 
     def _post(self, ep, params=None):
         return self._request(ep, method='POST', params=params)
+
+    def _put(self, ep, params=None):
+        return self._request(ep, method='PUT', params=params)
     
     def machines(self, hostname=None):
         ep = '/api/2.0/machines/'
@@ -91,6 +99,15 @@ class MAASClient:
         if not vlans:
             raise Exception(f"No vlans returned")
         return vlans
+    
+    def update_dhcpsnippet(self, snippet_id, value, description):
+        if not snippet_id:
+            raise Exception(f"snippet_id is required")
+        ep = f'/api/2.0/dhcp-snippets/{snippet_id}/'
+        params = { 'value': value, 'description': description }
+        resp = self._put(ep, params=params)
+        print(resp.text)
+        return resp.json()
     
     def create_fabric(self, name=None, description=None):
         ep = '/api/2.0/fabrics/'
