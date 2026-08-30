@@ -6,8 +6,8 @@ import json
 import argparse
 
 
-def run_maas_command(cmd, profile):
-    result = subprocess.run(f'maas {profile} {cmd}', shell=True, capture_output=True, text=True)
+def run_maas_command(cmd, profile, maas_path):
+    result = subprocess.run(f'{maas_path} {profile} {cmd}', shell=True, capture_output=True, text=True)
     if result.returncode != 0:
         print(f"Error executing command: {result.stderr}")
         exit(1)
@@ -18,13 +18,14 @@ if __name__ == '__main__':
     # Get the list of images used by machines in MAAS
     parser = argparse.ArgumentParser(description='Report used custom images in MAAS')
     parser.add_argument('--profile', default='admin', help='MAAS profile to use')
+    parser.add_argument('--maas-path', default='/usr/bin/maas', help='Path to the MAAS CLI tool')
     args = parser.parse_args()
 
-    maas_machines = run_maas_command('machines read', args.profile)
-    maas_images = run_maas_command('boot-resources read', args.profile)
+    maas_machines = run_maas_command('machines read', args.profile, args.maas_path)
+    maas_images = run_maas_command('boot-resources read', args.profile, args.maas_path)
 
-    images = defaultdict()
-    machines = defaultdict()
+    images = defaultdict(dict)
+    machines = defaultdict(dict)
 
     for image in maas_images:
         if image['type'] != 'Uploaded':
