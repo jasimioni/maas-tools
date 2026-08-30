@@ -120,3 +120,31 @@ class MAASClient:
         ep = '/api/2.0/subnets/'
         resp = self._post(ep, params={ "fabric": fabric_id, "vlan": vlan_id, "cidr": cidr, "gateway_ip": gateway_ip, "dns_servers": dns_servers })
         return resp.json()
+    
+    def create_machine(self, hostname=None, mac_addresses=None, power_type='manual', power_address=None, power_user=None, power_pass=None):
+        if hostname is None or mac_addresses is None:
+            raise Exception(f"hostname and mac_address are required")
+
+        params = {
+            "hostname": hostname,
+            "mac_addresses": mac_addresses,
+            "architecture": "amd64/generic",
+            "power_type": power_type,
+            "commissioning": False
+        }
+        if power_type != 'manual':
+            if not power_address or not power_user or not power_pass:
+                raise Exception(f"power_address, power_user, and power_pass are required for power_type {power_type}")
+
+            power_parameters = {
+                "power_user": power_user, 
+                "power_pass": power_pass,
+                "power_address": power_address,
+                "power_id": hostname
+            }
+
+            params[power_parameters] = power_parameters
+            
+        ep = '/api/2.0/machines/'
+        resp = self._post(ep, params=params)
+        return resp
