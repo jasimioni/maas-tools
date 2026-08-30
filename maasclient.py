@@ -130,7 +130,7 @@ class MAASClient:
             "mac_addresses": mac_addresses,
             "architecture": "amd64/generic",
             "power_type": power_type,
-            "commissioning": False
+            "commission": False
         }
         if power_type != 'manual':
             if not power_address or not power_user or not power_pass:
@@ -143,7 +143,7 @@ class MAASClient:
                 "power_id": hostname
             }
 
-            params[power_parameters] = power_parameters
+            params['power_parameters'] = json.dumps(power_parameters)
             
         ep = '/api/2.0/machines/'
         resp = self._post(ep, params=params)
