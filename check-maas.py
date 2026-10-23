@@ -72,7 +72,7 @@ def check_certificate(url):
     lines = output.stdout.decode().split("\n")
     n = [i for i, item in enumerate(lines) if re.search('Not After', item)]
     if n:
-        match = re.search('Not After\s*:\s(.*)', lines[n[0]])
+        match = re.search(r'Not After\s*:\s(.*)', lines[n[0]])
         expiration = yellow(match.group(1)).lstrip()
     else:
         expiration = red('not found')
@@ -81,7 +81,7 @@ def check_certificate(url):
 
     n = [i for i, item in enumerate(lines) if re.search('Subject:', item)]
     if n:
-        match = re.search('Subject:\s*(.*)', lines[n[0]])
+        match = re.search(r'Subject:\s*(.*)', lines[n[0]])
         subject = yellow(match.group(1).lstrip())
         print(f"\t{'Cert subject:':14s} {subject}")
 
@@ -104,7 +104,7 @@ def check_maas_services():
             status = yellow('failed to get status')
         else:
             status_line = output.stdout.decode().split("\n")[1]
-            name, admin_status, oper_status, *rest = re.split("\s+", status_line)
+            name, admin_status, oper_status, *rest = re.split(r"\s+", status_line)
             if admin_status == 'enabled':
                 if oper_status == 'active':
                     status = green(oper_status)
@@ -160,7 +160,7 @@ def check_candid():
         status = gray('not installed')
     else:
         status_line = output.stdout.decode().split("\n")[1]
-        name, admin_status, oper_status, *rest = re.split("\s+", status_line)
+        name, admin_status, oper_status, *rest = re.split(r"\s+", status_line)
         if admin_status == 'enabled':
             if oper_status == 'active':
                 status = green(oper_status)
@@ -192,8 +192,8 @@ def check_rbac():
     else:
         status = 'installed'
         for status_line in output.stdout.decode().split("\n")[1:3]:
-            name, admin_status, oper_status, *rest = re.split("\s+", status_line)
-            prefix, name = re.split("\.", name)
+            name, admin_status, oper_status, *rest = re.split(r"\s+", status_line)
+            prefix, name = re.split(r"\.", name)
             if admin_status == 'enabled':
                 if oper_status == 'active':
                     status = green(oper_status)
@@ -222,7 +222,7 @@ def check_postgresql():
     check_service('postgresql')
 
     output = subprocess.run(['pg_isready'], capture_output=True)
-    socket, message, *rest = re.split("\s-\s", output.stdout.decode())
+    socket, message, *rest = re.split(r"\s-\s", output.stdout.decode())
     if output.returncode:
         status = red(message.rstrip())
     else:
